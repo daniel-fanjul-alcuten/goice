@@ -8,6 +8,9 @@ import (
 func TestHashWriter(t *testing.T) {
 	str, buffer := "foo\n", &bytes.Buffer{}
 	writer := NewHashWriter(buffer, 1)
+	if writer == nil {
+		t.Fatal("Unexpected writer", writer)
+	}
 	n, err := writer.Write([]byte(str))
 	if n != len(str) {
 		t.Error("Unexpected n", n)

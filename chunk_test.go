@@ -1,6 +1,8 @@
 package ice
 
 import (
+	"bytes"
+	"io"
 	"testing"
 )
 
@@ -10,7 +12,7 @@ func TestChunkSize(t *testing.T) {
 	}
 }
 
-func TestCopy(t *testing.T) {
+func TestChunkCopy(t *testing.T) {
 	str, chunk := "foo\n", &Chunk{}
 	chunk.Copy([]byte(str))
 	if chunk.Len != len(str) {
@@ -21,7 +23,19 @@ func TestCopy(t *testing.T) {
 	}
 }
 
-func TestData(t *testing.T) {
+func TestChunkReadFrom(t *testing.T) {
+	str, buffer, chunk := "foo\n", &bytes.Buffer{}, &Chunk{}
+	buffer.Write([]byte(str))
+	err := chunk.ReadFrom(buffer)
+	if err != io.EOF {
+		t.Error("Unexpected err", err)
+	}
+	if string(chunk.Data()) != str {
+		t.Error("Unexpected chunk.Data()", chunk.Data())
+	}
+}
+
+func TestChunkData(t *testing.T) {
 	str, chunk := "foo\n", &Chunk{}
 	chunk.Copy([]byte(str))
 	if string(chunk.Data()) != str {

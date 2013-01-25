@@ -2,6 +2,7 @@ package ice
 
 import (
 	"crypto/sha256"
+	"io"
 )
 
 const ChunkSize = 2<<15 - 1
@@ -13,6 +14,14 @@ type Chunk struct {
 
 func (c *Chunk) Copy(data []byte) {
 	c.Len = copy(c.Dat[:], data)
+}
+
+func (c *Chunk) ReadFrom(reader io.Reader) (err error) {
+	c.Len, err = io.ReadFull(reader, c.Dat[:])
+	if err == io.ErrUnexpectedEOF {
+		err = io.EOF
+	}
+	return
 }
 
 func (c *Chunk) Data() []byte {
