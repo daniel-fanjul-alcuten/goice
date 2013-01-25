@@ -28,3 +28,24 @@ func TestData(t *testing.T) {
 		t.Error("Unexpected chunk.Data()", chunk.Data())
 	}
 }
+
+func TestChunkHash(t *testing.T) {
+	chunk := &Chunk{}
+	chunk.Copy([]byte("foo\n"))
+	shaChunk := chunk.Hash()
+	if shaChunk == nil {
+		t.Error("Unexpected shaChunk", shaChunk)
+	} else {
+		if shaChunk.Sha == nil {
+			t.Error("Unexpected shaChunk.Sha", shaChunk.Sha)
+		} else {
+			str := shaChunk.Sha.String()
+			if str != "b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c" {
+				t.Error("Unexpected String()", str)
+			}
+		}
+		if shaChunk.Chunk != chunk {
+			t.Error("Unexpected shaChunk.Chunk", shaChunk.Chunk)
+		}
+	}
+}
