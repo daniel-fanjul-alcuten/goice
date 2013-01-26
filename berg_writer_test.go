@@ -68,3 +68,69 @@ func TestBergWriter(t *testing.T) {
 		t.Error("Unexpected buffer", buffer)
 	}
 }
+
+func TestBergWriterDuplicatedChunks(t *testing.T) {
+
+	buffer := &bytes.Buffer{}
+	writer, err := NewBergWriter(buffer, 1)
+	if writer == nil {
+		t.Fatal("Unexpected writer", writer)
+	}
+	if err != nil {
+		t.Error("Unexpected err", err)
+	}
+
+	chunk := &Chunk{ChunkSize, [ChunkSize]byte{'f', 'o', 'o', '\n'}}
+	err = writer.Write(chunk.Hash())
+	if err != nil {
+		t.Error("Unexpected err", err)
+	}
+	err = writer.Write(chunk.Hash())
+	if err != nil {
+		t.Error("Unexpected err", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		t.Error("Unexpected err", err)
+	}
+
+	sha, err := writer.Sha()
+	if sha == nil {
+		t.Error("Unexpected sha", sha)
+	} else if sha.String() != "d5f449ffe19a2a6f2573c9ed1fa03ab32c1ba44b1f4e4c1e8c241e22c2a6ef46" {
+		t.Error("Unexpected sha", sha.String())
+	}
+	if err != nil {
+		t.Error("Unexpected err", err)
+	}
+
+	magic := buffer.Next(len(BERG_MAGIC))
+	if !bytes.Equal(magic, BERG_MAGIC) {
+		t.Error("Unexpected magic", magic)
+	}
+
+	sha1 := hex.EncodeToString(buffer.Next(ShaSize))
+	if sha1 != "090679444268a26337721a6f3819395feeedde88238a05b6d6d7eab26ae755a9" {
+		t.Error("Unexpected sha1", sha1)
+	}
+
+	length := buffer.Next(2)
+	if !bytes.Equal(length, []byte{255, 255}) {
+		t.Error("Unexpected length", length)
+	}
+
+	data := buffer.Next(ChunkSize)
+	if !bytes.Equal(data, chunk.Dat[:]) {
+		t.Error("Unexpected data", data)
+	}
+
+	sha2 := hex.EncodeToString(buffer.Next(ShaSize))
+	if sha2 != "d5f449ffe19a2a6f2573c9ed1fa03ab32c1ba44b1f4e4c1e8c241e22c2a6ef46" {
+		t.Error("Unexpected sha2", sha2)
+	}
+
+	if buffer.Len() > 0 {
+		t.Error("Unexpected buffer data", buffer.Len())
+	}
+}

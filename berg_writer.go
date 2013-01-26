@@ -9,6 +9,7 @@ var BERG_MAGIC = []byte("ice1b")
 type BergWriter struct {
 	writer io.Writer
 	hasher *HashWriter
+	shas   map[Sha]bool
 }
 
 func NewBergWriter(writer io.Writer, size int) (*BergWriter, error) {
@@ -16,18 +17,22 @@ func NewBergWriter(writer io.Writer, size int) (*BergWriter, error) {
 		return nil, err
 	}
 	hasher := NewHashWriter(writer, size)
-	return &BergWriter{writer, hasher}, nil
+	shas := make(map[Sha]bool, 1024)
+	return &BergWriter{writer, hasher, shas}, nil
 }
 
 func (w *BergWriter) Write(shaChunk *ShaChunk) error {
-	if _, err := w.hasher.Write(shaChunk.Sha.Data()); err != nil {
-		return err
-	}
-	if _, err := w.hasher.Write(shaChunk.Chunk.LenData()); err != nil {
-		return err
-	}
-	if _, err := w.hasher.Write(shaChunk.Chunk.Data()); err != nil {
-		return err
+	if !w.shas[*shaChunk.Sha] {
+		if _, err := w.hasher.Write(shaChunk.Sha.Data()); err != nil {
+			return err
+		}
+		if _, err := w.hasher.Write(shaChunk.Chunk.LenData()); err != nil {
+			return err
+		}
+		if _, err := w.hasher.Write(shaChunk.Chunk.Data()); err != nil {
+			return err
+		}
+		w.shas[*shaChunk.Sha] = true
 	}
 	return nil
 }
