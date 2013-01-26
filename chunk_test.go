@@ -24,13 +24,18 @@ func TestChunkCopy(t *testing.T) {
 }
 
 func TestChunkReadFrom(t *testing.T) {
-	str, buffer, chunk := "foo\n", &bytes.Buffer{}, &Chunk{}
-	buffer.Write([]byte(str))
+	str1, str2, buffer, chunk := "foo", "bar", &bytes.Buffer{}, &Chunk{}
+	buffer.Write([]byte(str1))
 	err := chunk.ReadFrom(buffer)
 	if err != io.EOF {
 		t.Error("Unexpected err", err)
 	}
-	if string(chunk.Data()) != str {
+	buffer.Write([]byte(str2))
+	err = chunk.ReadFrom(buffer)
+	if err != io.EOF {
+		t.Error("Unexpected err", err)
+	}
+	if string(chunk.Data()) != str1+str2 {
 		t.Error("Unexpected chunk.Data()", chunk.Data())
 	}
 }

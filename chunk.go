@@ -17,12 +17,13 @@ func (c *Chunk) Copy(data []byte) {
 	c.Len = copy(c.Dat[:], data)
 }
 
-func (c *Chunk) ReadFrom(reader io.Reader) (err error) {
-	c.Len, err = io.ReadFull(reader, c.Dat[:])
+func (c *Chunk) ReadFrom(reader io.Reader) error {
+	n, err := io.ReadFull(reader, c.Dat[c.Len:])
+	c.Len += n
 	if err == io.ErrUnexpectedEOF {
 		err = io.EOF
 	}
-	return
+	return err
 }
 
 func (c *Chunk) LenData() []byte {
