@@ -2,6 +2,7 @@ package ice
 
 import (
 	"crypto/sha256"
+	"encoding/binary"
 	"io"
 )
 
@@ -22,6 +23,12 @@ func (c *Chunk) ReadFrom(reader io.Reader) (err error) {
 		err = io.EOF
 	}
 	return
+}
+
+func (c *Chunk) LenData() []byte {
+	length := make([]byte, 2)
+	binary.BigEndian.PutUint16(length, uint16(c.Len))
+	return length
 }
 
 func (c *Chunk) Data() []byte {

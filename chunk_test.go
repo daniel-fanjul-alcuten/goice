@@ -35,6 +35,14 @@ func TestChunkReadFrom(t *testing.T) {
 	}
 }
 
+func TestChunkLenData(t *testing.T) {
+	str, chunk := "foo\n", &Chunk{}
+	chunk.Copy([]byte(str))
+	if !bytes.Equal(chunk.LenData(), []byte{0, byte(len(str))}) {
+		t.Error("Unexpected chunk.LenData()", chunk.LenData())
+	}
+}
+
 func TestChunkData(t *testing.T) {
 	str, chunk := "foo\n", &Chunk{}
 	chunk.Copy([]byte(str))
