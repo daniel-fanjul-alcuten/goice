@@ -24,7 +24,12 @@ func TestBergWriter(t *testing.T) {
 		t.Error("Unexpected err", err)
 	}
 
-	sha, err := writer.Close()
+	err = writer.Close()
+	if err != nil {
+		t.Error("Unexpected err", err)
+	}
+
+	sha, err := writer.Sha()
 	if sha == nil {
 		t.Error("Unexpected sha", sha)
 	} else if sha.String() != "2d9416ef7150ace93dbf69cb813ef0b071337c2cd97befca68bfc22d5434bb9b" {

@@ -32,8 +32,11 @@ func (w *BergWriter) Write(shaChunk *ShaChunk) error {
 	return nil
 }
 
-func (w *BergWriter) Close() (*Sha, error) {
-	w.hasher.Close()
+func (w *BergWriter) Close() error {
+	return w.hasher.Close()
+}
+
+func (w *BergWriter) Sha() (*Sha, error) {
 	sha := w.hasher.Sha()
 	_, err := w.writer.Write(sha.Data())
 	return sha, err
