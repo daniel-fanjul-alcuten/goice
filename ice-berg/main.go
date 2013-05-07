@@ -44,13 +44,13 @@ func main() {
 			}
 		case err, ok := <-rerrs:
 			if ok {
-				log.Println(err)
+				log.Fatalln(err)
 			} else {
 				rerrs = nil
 			}
 		case err, ok := <-werrs:
 			if ok {
-				log.Println(err)
+				log.Fatalln(err)
 			} else {
 				werrs = nil
 			}
